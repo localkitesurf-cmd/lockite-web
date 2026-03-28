@@ -14,7 +14,7 @@ export default async function SpotsPage({
 }: {
   searchParams: { type?: string; level?: string; q?: string };
 }) {
-  const session = await getSession().catch(() => null);
+  const session = null;
 
   // Filter mock data (in production: call API with searchParams)
   let spots = MOCK_SPOTS;

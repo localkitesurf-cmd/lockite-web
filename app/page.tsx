@@ -5,7 +5,7 @@ import { getSession } from '@/lib/supabase';
 import { MOCK_SPOTS, MOCK_FORECAST } from '@/lib/types';
 
 export default async function HomePage() {
-  const session = await getSession().catch(() => null);
+  const session = null;
   const featuredSpots = MOCK_SPOTS.slice(0, 3);
 
   return (

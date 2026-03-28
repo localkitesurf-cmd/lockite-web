@@ -40,7 +40,7 @@ export default async function SpotDetailPage({ params }: { params: { slug: strin
   const spot = MOCK_SPOTS.find(s => s.slug === params.slug);
   if (!spot) notFound();
 
-  const session = await getSession().catch(() => null);
+  const session = null;
   const current = MOCK_FORECAST[spot.id];
   const condColor = current ? WIND_COLORS[current.condition.score] : '#5A7A8A';
 
