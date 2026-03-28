@@ -1,261 +1,283 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { MOCK_SPOTS, MOCK_FORECAST, WIND_COLORS, WIND_LABELS, TYPE_LABELS, LEVEL_LABELS, type Spot } from '@/lib/types';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { MOCK_SPOTS, MOCK_FORECAST, TYPE_LABELS, LEVEL_LABELS, type Spot } from '@/lib/types';
+
+function windColor(spotId: string) {
+  const fc = MOCK_FORECAST[spotId];
+  if (!fc) return '#5A7A8A';
+  return fc.condition.color;
+}
+
+function windKnots(spotId: string) {
+  const fc = MOCK_FORECAST[spotId];
+  return fc ? `${fc.wind_speed_knots} kn` : null;
+}
+
+function IconX() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  );
+}
+function IconArrow() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </svg>
+  );
+}
+function IconList() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+      <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    </svg>
+  );
+}
+
+type Filter = 'all' | 'flat' | 'wave' | 'hybrid';
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: 'all',    label: 'Alle' },
+  { key: 'flat',   label: 'Flachwasser' },
+  { key: 'wave',   label: 'Wave' },
+  { key: 'hybrid', label: 'Hybrid' },
+];
+
+function BottomSheet({ spot, onClose }: { spot: Spot; onClose: () => void }) {
+  const fc = MOCK_FORECAST[spot.id];
+  const color = fc?.condition.color ?? '#5A7A8A';
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'transparent' }} />
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+        background: '#0D1E2C',
+        borderTop: `1px solid ${color}30`,
+        borderRadius: '20px 20px 0 0',
+        padding: '0 0 max(24px, env(safe-area-inset-bottom)) 0',
+        boxShadow: '0 -20px 60px rgba(0,0,0,0.6)',
+        animation: 'slideUp 0.25s ease-out',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
+        </div>
+        <div style={{ padding: '12px 20px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
+              <p style={{ fontSize: 11, color: '#5A7A8A', fontWeight: 500, letterSpacing: '0.05em', marginBottom: 4 }}>
+                {spot.region ? `${spot.region}, ` : ''}{spot.country}
+              </p>
+              <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'white', lineHeight: 1.1 }}>
+                {spot.name}
+              </h2>
+            </div>
+            <button onClick={onClose}
+              style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: 'none', cursor: 'pointer', color: '#5A7A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <IconX />
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: 'rgba(10,110,189,0.15)', border: '1px solid rgba(10,110,189,0.3)', color: '#0A6EBD' }}>
+              {TYPE_LABELS[spot.type]}
+            </span>
+            {spot.level_tags.map(l => (
+              <span key={l} style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#5A7A8A' }}>
+                {LEVEL_LABELS[l]}
+              </span>
+            ))}
+            {spot.verified && (
+              <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,194,203,0.1)', border: '1px solid rgba(0,194,203,0.3)', color: '#00C2CB' }}>
+                ✓ Verifiziert
+              </span>
+            )}
+          </div>
+          {fc && (
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}20`, borderLeft: `3px solid ${color}`, borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5A7A8A', marginBottom: 4 }}>Live Wind</p>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 800, color, letterSpacing: '-2px' }}>{fc.wind_speed_knots}</span>
+                    <span style={{ fontSize: 14, color: '#5A7A8A' }}>kn</span>
+                    <span style={{ fontSize: 13, color: '#5A7A8A', marginLeft: 4 }}>{fc.wind_direction_label}</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#5A7A8A', marginTop: 2 }}>Böen {fc.wind_gusts_knots} kn · {fc.temperature}°C</p>
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 20, color, border: `1px solid ${color}50`, background: `${color}12` }}>
+                  {fc.condition.label}
+                </span>
+              </div>
+            </div>
+          )}
+          {spot.options?.length > 0 && (
+            <p style={{ fontSize: 12, color: '#5A7A8A', marginBottom: 16 }}>
+              {spot.options.length} Kite-Option{spot.options.length > 1 ? 'en' : ''} verfügbar
+            </p>
+          )}
+          <Link href={`/spots/${spot.slug}`}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px', borderRadius: 14, background: '#00C2CB', color: '#07111C', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+            Spot öffnen <IconArrow />
+          </Link>
+        </div>
+      </div>
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+      `}</style>
+    </>
+  );
+}
 
 export default function MapPage() {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<any>(null);
-  const [selected, setSelected] = useState<Spot | null>(MOCK_SPOTS[0]);
-  const [filter, setFilter] = useState<'all' | 'flat' | 'wave' | 'hybrid'>('all');
-  const [loaded, setLoaded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef       = useRef<any>(null);
+  const markersRef   = useRef<any[]>([]);
+  const [loaded,   setLoaded]   = useState(false);
+  const [selected, setSelected] = useState<Spot | null>(null);
+  const [filter,   setFilter]   = useState<Filter>('all');
 
-  const spots = filter === 'all' ? MOCK_SPOTS : MOCK_SPOTS.filter(s => s.type === filter);
+  const filtered = filter === 'all' ? MOCK_SPOTS : MOCK_SPOTS.filter(s => s.type === filter);
 
   useEffect(() => {
-    if (mapRef.current || !mapContainer.current) return;
-
+    if (mapRef.current || !containerRef.current) return;
     const key = process.env.NEXT_PUBLIC_MAPTILER_KEY;
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css';
-    document.head.appendChild(link);
-
+    const cssLink = document.createElement('link');
+    cssLink.rel = 'stylesheet';
+    cssLink.href = 'https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.css';
+    document.head.appendChild(cssLink);
     const script = document.createElement('script');
     script.src = 'https://cdn.maptiler.com/maptiler-sdk-js/v2.0.3/maptiler-sdk.umd.min.js';
     script.onload = () => {
-      const maptilersdk = (window as any).maptilersdk;
-      maptilersdk.config.apiKey = key;
-
-      const map = new maptilersdk.Map({
-        container: mapContainer.current,
-        style: maptilersdk.MapStyle.DATAVIZ.DARK,
-        center: [10, 20],
-        zoom: 2,
+      const sdk = (window as any).maptilersdk;
+      sdk.config.apiKey = key;
+      const map = new sdk.Map({
+        container: containerRef.current,
+        style: sdk.MapStyle.DATAVIZ.DARK,
+        center: [15, 25],
+        zoom: 2.2,
         attributionControl: false,
+        pitchWithRotate: false,
+        dragRotate: false,
       });
-
       mapRef.current = map;
-
-      map.on('load', () => {
-        setLoaded(true);
-
-        MOCK_SPOTS.forEach(spot => {
-          const forecast = MOCK_FORECAST[spot.id];
-          const color = forecast ? WIND_COLORS[forecast.condition.score] : '#0A6EBD';
-
-          const el = document.createElement('div');
-          el.style.cssText = `
-            display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; transform-origin: bottom center;
-            transition: transform 0.2s;
-          `;
-
-          const label = document.createElement('div');
-          label.style.cssText = `
-            background: #0D1E2C; border: 1px solid ${color}50;
-            color: ${color}; font-size: 11px; font-weight: 700;
-            padding: 3px 8px; border-radius: 4px; white-space: nowrap;
-            margin-bottom: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            font-family: 'Syne', sans-serif;
-          `;
-          label.textContent = forecast ? `${forecast.wind_speed_knots} kn` : spot.name;
-
-          const dot = document.createElement('div');
-          dot.style.cssText = `
-            width: 12px; height: 12px; border-radius: 50%;
-            background: ${color}; border: 2px solid rgba(255,255,255,0.8);
-            box-shadow: 0 0 0 3px ${color}30;
-          `;
-
-          const tail = document.createElement('div');
-          tail.style.cssText = `
-            width: 0; height: 0;
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 5px solid ${color};
-            margin-top: -1px;
-          `;
-
-          el.appendChild(label);
-          el.appendChild(dot);
-          el.appendChild(tail);
-
-          el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.15)'; });
-          el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
-          el.addEventListener('click', () => {
-            setSelected(spot);
-            map.flyTo({ center: [spot.longitude, spot.latitude - 8], zoom: 5, duration: 800 });
-          });
-
-          new maptilersdk.Marker({ element: el, anchor: 'bottom' })
-            .setLngLat([spot.longitude, spot.latitude])
-            .addTo(map);
-        });
-      });
+      map.on('load', () => { setLoaded(true); addMarkers(sdk, map, MOCK_SPOTS); });
+      map.on('click', () => setSelected(null));
     };
-
     document.head.appendChild(script);
-
     return () => {
+      markersRef.current.forEach(m => m.remove());
+      markersRef.current = [];
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
     };
   }, []);
 
-  const current = selected ? MOCK_FORECAST[selected.id] : null;
-  const condColor = current ? WIND_COLORS[current.condition.score] : '#0A6EBD';
+  const addMarkers = useCallback((sdk: any, map: any, spots: Spot[]) => {
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+    spots.forEach(spot => {
+      const color = windColor(spot.id);
+      const kn    = windKnots(spot.id);
+      const el = document.createElement('div');
+      el.style.cssText = `cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.15s ease;will-change:transform;`;
+      if (kn) {
+        const badge = document.createElement('div');
+        badge.style.cssText = `background:#0D1E2C;border:1px solid ${color}60;color:${color};font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;font-family:'Syne',sans-serif;letter-spacing:0.02em;box-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;`;
+        badge.textContent = kn;
+        el.appendChild(badge);
+      }
+      const dot = document.createElement('div');
+      dot.style.cssText = `width:10px;height:10px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.9);box-shadow:0 0 0 3px ${color}30,0 2px 8px rgba(0,0,0,0.4);pointer-events:none;`;
+      el.appendChild(dot);
+      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; });
+      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setSelected(spot);
+        map.easeTo({ center: [spot.longitude, spot.latitude], zoom: Math.max(map.getZoom(), 4), duration: 400, offset: [0, 80] });
+      });
+      const marker = new sdk.Marker({ element: el, anchor: 'bottom' })
+        .setLngLat([spot.longitude, spot.latitude])
+        .addTo(map);
+      markersRef.current.push(marker);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!mapRef.current || !loaded) return;
+    const sdk = (window as any).maptilersdk;
+    if (!sdk) return;
+    setSelected(null);
+    addMarkers(sdk, mapRef.current, filtered);
+  }, [filter, loaded, addMarkers]);
 
   return (
-    <div className="fixed inset-0 bg-ink flex flex-col" style={{ fontFamily: 'DM Sans, sans-serif' }}>
-      <div className="flex items-center justify-between px-4 h-14 border-b border-white/[0.07] bg-ink/95 backdrop-blur-xl z-20 flex-shrink-0">
-        <Link href="/" className="font-bold text-lg text-white" style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em' }}>
-          LOCK<span style={{ color: '#00C2CB' }}>ITE</span>
+    <div style={{ position: 'fixed', inset: 0, background: '#07111C', display: 'flex', flexDirection: 'column' }}>
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
+        padding: '12px 16px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+        background: 'linear-gradient(to bottom, rgba(7,17,28,0.95) 0%, rgba(7,17,28,0.7) 70%, transparent 100%)',
+        paddingTop: 'max(12px, env(safe-area-inset-top))',
+      }}>
+        <Link href="/" style={{ flexShrink: 0 }}>
+          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 16, letterSpacing: '-0.04em', color: 'white' }}>
+            LOCK<span style={{ color: '#00C2CB' }}>ITE</span>
+          </span>
         </Link>
-        <div className="flex gap-1.5">
-          {(['all', 'flat', 'wave', 'hybrid'] as const).map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', flexShrink: 1, scrollbarWidth: 'none' }}>
+          {FILTERS.map(f => (
+            <button key={f.key} onClick={() => setFilter(f.key)}
               style={{
-                background: filter === f ? 'rgba(0,194,203,0.15)' : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${filter === f ? '#00C2CB' : 'rgba(255,255,255,0.1)'}`,
-                color: filter === f ? '#00C2CB' : '#5A7A8A',
+                padding: '7px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                whiteSpace: 'nowrap', cursor: 'pointer', border: 'none', transition: 'all 0.15s',
+                background: filter === f.key ? 'rgba(0,194,203,0.15)' : 'rgba(255,255,255,0.06)',
+                color: filter === f.key ? '#00C2CB' : '#5A7A8A',
+                outline: filter === f.key ? '1px solid rgba(0,194,203,0.4)' : '1px solid rgba(255,255,255,0.08)',
               }}>
-              {f === 'all' ? 'Alle' : TYPE_LABELS[f]}
+              {f.label}
             </button>
           ))}
         </div>
-        <Link href="/spots" className="text-xs text-dim hover:text-white transition-colors">
-          Liste →
+        <Link href="/spots" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: '#5A7A8A', padding: '7px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <IconList />
         </Link>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 relative">
-          <div ref={mapContainer} className="w-full h-full" />
-          {!loaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-ink">
-              <div className="text-center">
-                <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: '#00C2CB', borderTopColor: 'transparent' }} />
-                <p className="text-sm" style={{ color: '#5A7A8A' }}>Karte wird geladen...</p>
-              </div>
-            </div>
-          )}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full text-xs font-semibold z-10"
-            style={{ background: 'rgba(13,30,44,0.95)', border: '1px solid rgba(0,194,203,0.2)', color: '#5A7A8A' }}>
-            {spots.length} Spots
+      <div ref={containerRef} style={{ flex: 1, width: '100%', height: '100%' }} />
+
+      {!loaded && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#07111C', zIndex: 20 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 32, height: 32, border: '2px solid #00C2CB', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
+            <p style={{ fontSize: 13, color: '#5A7A8A' }}>Karte wird geladen...</p>
           </div>
         </div>
+      )}
 
-        {selected && (
-          <div className="w-72 flex-shrink-0 border-l border-white/[0.07] overflow-y-auto"
-            style={{ background: '#0D1E2C', scrollbarWidth: 'none' }}>
-            <div className="p-4 border-b border-white/[0.07]">
-              <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: '#5A7A8A' }}>
-                {selected.country}
-              </p>
-              <h2 className="text-xl font-bold text-white mb-2" style={{ fontFamily: 'Syne, sans-serif', letterSpacing: '-0.04em' }}>
-                {selected.name}
-              </h2>
-              <div className="flex gap-1.5 flex-wrap">
-                <span className="text-xs font-semibold px-2 py-1 rounded"
-                  style={{ background: 'rgba(10,110,189,0.15)', border: '1px solid rgba(10,110,189,0.3)', color: '#0A6EBD' }}>
-                  {TYPE_LABELS[selected.type]}
-                </span>
-                {selected.level_tags.map(l => (
-                  <span key={l} className="text-xs font-semibold px-2 py-1 rounded"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#5A7A8A' }}>
-                    {LEVEL_LABELS[l]}
-                  </span>
-                ))}
-              </div>
-            </div>
+      {loaded && (
+        <div style={{
+          position: 'absolute', bottom: selected ? 240 : 24, left: '50%', transform: 'translateX(-50%)',
+          padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: '#5A7A8A',
+          background: 'rgba(13,30,44,0.95)', border: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(10px)', zIndex: 20, transition: 'bottom 0.25s ease', whiteSpace: 'nowrap',
+        }}>
+          {filtered.length} Spots
+        </div>
+      )}
 
-            {current && (
-              <div className="p-4 border-b border-white/[0.07]" style={{ borderLeft: `3px solid ${condColor}` }}>
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#5A7A8A' }}>Live Wind</p>
-                <div className="flex items-baseline gap-1.5 mb-1">
-                  <span className="text-4xl font-bold" style={{ fontFamily: 'Syne, sans-serif', color: condColor }}>
-                    {current.wind_speed_knots}
-                  </span>
-                  <span className="text-lg" style={{ color: '#5A7A8A' }}>kn</span>
-                  <span className="text-sm ml-1" style={{ color: '#5A7A8A' }}>{current.wind_direction_label}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-xs" style={{ color: '#5A7A8A' }}>
-                    Böen: {current.wind_gusts_knots} kn · {current.temperature}°C
-                  </p>
-                  <span className="text-xs font-bold px-2 py-1 rounded-full"
-                    style={{ color: condColor, border: `1px solid ${condColor}`, background: `${condColor}15` }}>
-                    {WIND_LABELS[current.condition.score]}
-                  </span>
-                </div>
-              </div>
-            )}
+      {selected && <BottomSheet spot={selected} onClose={() => setSelected(null)} />}
 
-            <div className="p-4 border-b border-white/[0.07]">
-              <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: '#5A7A8A' }}>Bewertung</span>
-                <div className="flex items-center gap-1">
-                  <span style={{ color: '#FBBF24', fontSize: 12 }}>★</span>
-                  <span className="font-bold text-white text-sm">{selected.avg_rating.toFixed(1)}</span>
-                  <span className="text-xs" style={{ color: '#5A7A8A' }}>({selected.review_count})</span>
-                </div>
-              </div>
-              {selected.verified && (
-                <div className="flex items-center gap-1 mt-1">
-                  <span style={{ color: '#00C2CB', fontSize: 11 }}>✓</span>
-                  <span className="text-xs font-semibold" style={{ color: '#00C2CB' }}>Verifizierter Spot</span>
-                </div>
-              )}
-            </div>
-
-            <div className="p-3">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 px-1" style={{ color: '#5A7A8A' }}>
-                Alle Spots
-              </p>
-              {MOCK_SPOTS.map(spot => {
-                const fc = MOCK_FORECAST[spot.id];
-                const c = fc ? WIND_COLORS[fc.condition.score] : '#5A7A8A';
-                return (
-                  <button key={spot.id} onClick={() => {
-                    setSelected(spot);
-                    if (mapRef.current) {
-                      mapRef.current.flyTo({ center: [spot.longitude, spot.latitude - 8], zoom: 5, duration: 800 });
-                    }
-                  }}
-                    className="w-full text-left p-3 rounded-lg mb-1.5 transition-all"
-                    style={{
-                      background: selected.id === spot.id ? 'rgba(0,194,203,0.1)' : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${selected.id === spot.id ? 'rgba(0,194,203,0.3)' : 'rgba(255,255,255,0.06)'}`,
-                    }}>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs" style={{ color: '#5A7A8A' }}>{spot.country}</p>
-                        <p className="text-sm font-semibold text-white">{spot.name}</p>
-                      </div>
-                      {fc && (
-                        <span className="text-sm font-bold" style={{ color: c, fontFamily: 'Syne, sans-serif' }}>
-                          {fc.wind_speed_knots} kn
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="p-4 pt-0">
-              <Link href={`/spots/${selected.slug}`}
-                className="block w-full text-center py-3 rounded-lg font-bold text-sm transition-opacity hover:opacity-90"
-                style={{ background: '#00C2CB', color: '#07111C', fontFamily: 'Syne, sans-serif' }}>
-                Spot Detail öffnen →
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .maplibregl-canvas { touch-action: pan-x pan-y; }
+      `}</style>
     </div>
   );
 }
