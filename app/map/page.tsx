@@ -2,14 +2,13 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { MOCK_SPOTS, MOCK_FORECAST, TYPE_LABELS, LEVEL_LABELS, type Spot } from '@/lib/types';
+import { MOCK_SPOTS, MOCK_FORECAST, TYPE_LABELS, TYPE_ICONS, LEVEL_LABELS, type Spot } from '@/lib/types';
 
 function windColor(spotId: string) {
   const fc = MOCK_FORECAST[spotId];
   if (!fc) return '#5A7A8A';
   return fc.condition.color;
 }
-
 function windKnots(spotId: string) {
   const fc = MOCK_FORECAST[spotId];
   return fc ? `${fc.wind_speed_knots} kn` : null;
@@ -24,7 +23,7 @@ function IconX() {
 }
 function IconArrow() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
     </svg>
   );
@@ -52,23 +51,27 @@ function BottomSheet({ spot, onClose }: { spot: Spot; onClose: () => void }) {
 
   return (
     <>
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'transparent' }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 40 }} />
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
         background: '#0D1E2C',
         borderTop: `1px solid ${color}30`,
         borderRadius: '20px 20px 0 0',
-        padding: '0 0 max(24px, env(safe-area-inset-bottom)) 0',
+        maxHeight: '80vh',
+        overflowY: 'auto',
+        paddingBottom: 'max(24px, env(safe-area-inset-bottom))',
         boxShadow: '0 -20px 60px rgba(0,0,0,0.6)',
         animation: 'slideUp 0.25s ease-out',
+        scrollbarWidth: 'none',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px', position: 'sticky', top: 0, background: '#0D1E2C', zIndex: 1 }}>
           <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
         </div>
-        <div style={{ padding: '12px 20px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+
+        <div style={{ padding: '8px 20px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
             <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
-              <p style={{ fontSize: 11, color: '#5A7A8A', fontWeight: 500, letterSpacing: '0.05em', marginBottom: 4 }}>
+              <p style={{ fontSize: 11, color: '#5A7A8A', fontWeight: 500, letterSpacing: '0.05em', marginBottom: 3 }}>
                 {spot.region ? `${spot.region}, ` : ''}{spot.country}
               </p>
               <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em', color: 'white', lineHeight: 1.1 }}>
@@ -80,55 +83,90 @@ function BottomSheet({ spot, onClose }: { spot: Spot; onClose: () => void }) {
               <IconX />
             </button>
           </div>
-          <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: 'rgba(10,110,189,0.15)', border: '1px solid rgba(10,110,189,0.3)', color: '#0A6EBD' }}>
+
+          <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(10,110,189,0.15)', border: '1px solid rgba(10,110,189,0.3)', color: '#0A6EBD' }}>
               {TYPE_LABELS[spot.type]}
             </span>
             {spot.level_tags.map(l => (
-              <span key={l} style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#5A7A8A' }}>
+              <span key={l} style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 20, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#5A7A8A' }}>
                 {LEVEL_LABELS[l]}
               </span>
             ))}
             {spot.verified && (
-              <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,194,203,0.1)', border: '1px solid rgba(0,194,203,0.3)', color: '#00C2CB' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 20, background: 'rgba(0,194,203,0.1)', border: '1px solid rgba(0,194,203,0.3)', color: '#00C2CB' }}>
                 ✓ Verifiziert
               </span>
             )}
           </div>
+
           {fc && (
-            <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}20`, borderLeft: `3px solid ${color}`, borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+            <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${color}20`, borderLeft: `3px solid ${color}`, borderRadius: 12, padding: '12px 14px', marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5A7A8A', marginBottom: 4 }}>Live Wind</p>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#5A7A8A', marginBottom: 3 }}>Live Wind</p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                    <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 800, color, letterSpacing: '-2px' }}>{fc.wind_speed_knots}</span>
-                    <span style={{ fontSize: 14, color: '#5A7A8A' }}>kn</span>
-                    <span style={{ fontSize: 13, color: '#5A7A8A', marginLeft: 4 }}>{fc.wind_direction_label}</span>
+                    <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 28, fontWeight: 800, color, letterSpacing: '-2px' }}>{fc.wind_speed_knots}</span>
+                    <span style={{ fontSize: 13, color: '#5A7A8A' }}>kn</span>
+                    <span style={{ fontSize: 12, color: '#5A7A8A', marginLeft: 4 }}>{fc.wind_direction_label}</span>
                   </div>
-                  <p style={{ fontSize: 12, color: '#5A7A8A', marginTop: 2 }}>Böen {fc.wind_gusts_knots} kn · {fc.temperature}°C</p>
+                  <p style={{ fontSize: 11, color: '#5A7A8A', marginTop: 1 }}>Böen {fc.wind_gusts_knots} kn · {fc.temperature}°C</p>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 700, padding: '6px 14px', borderRadius: 20, color, border: `1px solid ${color}50`, background: `${color}12` }}>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '5px 12px', borderRadius: 20, color, border: `1px solid ${color}50`, background: `${color}12` }}>
                   {fc.condition.label}
                 </span>
               </div>
             </div>
           )}
-          {spot.options?.length > 0 && (
-            <p style={{ fontSize: 12, color: '#5A7A8A', marginBottom: 16 }}>
-              {spot.options.length} Kite-Option{spot.options.length > 1 ? 'en' : ''} verfügbar
-            </p>
+
+          {spot.options && spot.options.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5A7A8A', marginBottom: 10 }}>
+                {spot.options.length} Kite-Optionen
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {spot.options.map(option => (
+                  <div key={option.name}
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '12px 14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 14 }}>{TYPE_ICONS[option.type]}</span>
+                        <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 13, fontWeight: 700, color: 'white', letterSpacing: '-0.01em' }}>
+                          {option.name}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        {option.wind_directions.map(d => (
+                          <span key={d} style={{ fontSize: 10, fontWeight: 700, padding: '2px 6px', borderRadius: 4, background: 'rgba(0,194,203,0.08)', color: '#00C2CB', border: '1px solid rgba(0,194,203,0.2)' }}>
+                            {d}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 6, flexWrap: 'wrap' }}>
+                      {option.level_tags.map(l => (
+                        <span key={l} style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#5A7A8A' }}>
+                          {LEVEL_LABELS[l]}
+                        </span>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: 12, color: '#5A7A8A', lineHeight: 1.5, fontWeight: 300 }}>
+                      {option.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
+
           <Link href={`/spots/${spot.slug}`}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px', borderRadius: 14, background: '#00C2CB', color: '#07111C', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
-            Spot öffnen <IconArrow />
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px', borderRadius: 14, background: '#00C2CB', color: '#07111C', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, textDecoration: 'none', marginBottom: 4 }}>
+            Vollständige Spot-Info <IconArrow />
           </Link>
         </div>
       </div>
       <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(100%); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
       `}</style>
     </>
   );
@@ -187,7 +225,7 @@ export default function MapPage() {
       el.style.cssText = `cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:transform 0.15s ease;will-change:transform;`;
       if (kn) {
         const badge = document.createElement('div');
-        badge.style.cssText = `background:#0D1E2C;border:1px solid ${color}60;color:${color};font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;font-family:'Syne',sans-serif;letter-spacing:0.02em;box-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;`;
+        badge.style.cssText = `background:#0D1E2C;border:1px solid ${color}60;color:${color};font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;font-family:'Syne',sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.5);pointer-events:none;`;
         badge.textContent = kn;
         el.appendChild(badge);
       }
@@ -244,7 +282,7 @@ export default function MapPage() {
             </button>
           ))}
         </div>
-        <Link href="/spots" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: '#5A7A8A', padding: '7px 10px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Link href="/spots" style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#5A7A8A' }}>
           <IconList />
         </Link>
       </div>
@@ -260,12 +298,12 @@ export default function MapPage() {
         </div>
       )}
 
-      {loaded && (
+      {loaded && !selected && (
         <div style={{
-          position: 'absolute', bottom: selected ? 240 : 24, left: '50%', transform: 'translateX(-50%)',
+          position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
           padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600, color: '#5A7A8A',
           background: 'rgba(13,30,44,0.95)', border: '1px solid rgba(255,255,255,0.08)',
-          backdropFilter: 'blur(10px)', zIndex: 20, transition: 'bottom 0.25s ease', whiteSpace: 'nowrap',
+          backdropFilter: 'blur(10px)', zIndex: 20, whiteSpace: 'nowrap',
         }}>
           {filtered.length} Spots
         </div>
@@ -276,7 +314,6 @@ export default function MapPage() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .maplibregl-canvas { touch-action: pan-x pan-y; }
       `}</style>
     </div>
   );
