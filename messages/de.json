@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "spots": "Spots",
+    "map": "Karte",
+    "login": "Anmelden",
+    "start": "Kostenlos starten"
+  },
+  "hero": {
+    "eyebrow": "Kitesurf Platform",
+    "headline": "Finde deinen",
+    "headline2": "perfekten Spot.",
+    "sub": "Echtzeit-Winddaten, weltweite Kitesurf-Destinationen und smarte Reiseplanung — in einer Plattform.",
+    "cta_spots": "Spots entdecken",
+    "cta_map": "Karte öffnen"
+  },
+  "stats": {
+    "destinations": "Destinationen",
+    "countries": "Länder",
+    "forecast": "Wind-Forecast",
+    "live": "Live"
+  },
+  "spots": {
+    "title": "Die besten Spots der Welt.",
+    "eyebrow": "Destinationen",
+    "options": "Optionen",
+    "option": "Option",
+    "all": "Alle {count} Destinationen",
+    "filter_all": "Alle",
+    "flat": "Flachwasser",
+    "wave": "Wave",
+    "hybrid": "Hybrid",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "pro": "Pro"
+  },
+  "features": {
+    "eyebrow": "Plattform",
+    "title": "Alles was du brauchst.",
+    "wind_title": "Wind-Forecast",
+    "wind_desc": "Windstärke, Böen, Richtung und 7-Tage-Vorschau für jede Destination.",
+    "options_title": "Kite-Optionen",
+    "options_desc": "Konkrete Spot-Optionen mit Level, Typ und bester Windrichtung.",
+    "map_title": "Interaktive Karte",
+    "map_desc": "Alle Destinationen mit Live-Winddaten und Filterfunktion.",
+    "season_title": "Beste Reisezeit",
+    "season_desc": "Optimale Reisemonate für jede Destination.",
+    "level_title": "Level-Filter",
+    "level_desc": "Beginner, Intermediate oder Pro — passende Spots sofort.",
+    "windy_title": "Windy-Integration",
+    "windy_desc": "Direktlink zu Windy.com mit genauen Koordinaten."
+  },
+  "cta": {
+    "title": "Bereit?",
+    "sub": "Kostenlos registrieren — kein Abo, keine Kreditkarte.",
+    "btn": "Jetzt starten"
+  },
+  "spot_detail": {
+    "back": "Spots",
+    "verified": "Verifiziert",
+    "live_wind": "Live Wind",
+    "live": "LIVE",
+    "gusts": "Böen",
+    "temp": "Temperatur",
+    "forecast": "7-Tage Forecast",
+    "kite_options": "Kite-Optionen",
+    "best_months": "Beste Reisezeit",
+    "ratings": "Bewertung",
+    "about": "Über den Spot",
+    "accommodation": "Unterkunft suchen",
+    "wind_unavailable": "Wind-Daten momentan nicht verfügbar.",
+    "not_found": "Destination nicht gefunden.",
+    "wind_quality": "Windqualität",
+    "reliability": "Verlässlichkeit",
+    "crowd": "Crowd",
+    "beginner_friendly": "Anfänger",
+    "price": "Preisniveau",
+    "overall": "Gesamt",
+    "open_windy": "Auf Windy.com öffnen"
+  },
+  "auth": {
+    "login_title": "Willkommen zurück.",
+    "login_sub": "Melde dich an, um deine Spots zu sehen.",
+    "register_title": "Account erstellen.",
+    "register_sub": "Kostenlos — kein Abo nötig.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirm_password": "Passwort bestätigen",
+    "name": "Name",
+    "forgot": "Passwort vergessen?",
+    "signin": "Anmelden",
+    "register": "Registrieren",
+    "no_account": "Noch kein Account?",
+    "has_account": "Bereits registriert?",
+    "guest": "Als Gast fortfahren",
+    "google": "Mit Google fortfahren",
+    "apple": "Mit Apple fortfahren",
+    "or": "oder",
+    "level_title": "Dein Level?",
+    "level_sub": "Damit zeigen wir dir die passenden Spots.",
+    "next": "Weiter",
+    "back": "Zurück",
+    "beginner": "Beginner",
+    "beginner_desc": "Ich lerne noch kitesurfen",
+    "intermediate": "Intermediate",
+    "intermediate_desc": "1–3 Jahre Erfahrung",
+    "pro": "Pro",
+    "pro_desc": "Jahrelange Erfahrung"
+  },
+  "footer": {
+    "copy": "© 2025 Lockite"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "spots": "Spots",
+    "map": "Kaart",
+    "login": "Inloggen",
+    "start": "Gratis starten"
+  },
+  "hero": {
+    "eyebrow": "Kitesurf Platform",
+    "headline": "Vind jouw",
+    "headline2": "perfecte spot.",
+    "sub": "Realtime winddata, wereldwijde kitesurf-bestemmingen en slimme reisplanning — in één platform.",
+    "cta_spots": "Spots ontdekken",
+    "cta_map": "Kaart openen"
+  },
+  "stats": {
+    "destinations": "Bestemmingen",
+    "countries": "Landen",
+    "forecast": "Windverwachting",
+    "live": "Live"
+  },
+  "spots": {
+    "title": "De beste spots ter wereld.",
+    "eyebrow": "Bestemmingen",
+    "options": "Opties",
+    "option": "Optie",
+    "all": "Alle {count} bestemmingen",
+    "filter_all": "Alle",
+    "flat": "Platwater",
+    "wave": "Golf",
+    "hybrid": "Hybride",
+    "beginner": "Beginner",
+    "intermediate": "Gemiddeld",
+    "pro": "Pro"
+  },
+  "features": {
+    "eyebrow": "Platform",
+    "title": "Alles wat je nodig hebt.",
+    "wind_title": "Windverwachting",
+    "wind_desc": "Windsnelheid, windstoten, richting en 7-daagse vooruitzichten voor elke bestemming.",
+    "options_title": "Kite-opties",
+    "options_desc": "Specifieke spotopties binnen een bestemming — met niveau, type en beste windrichting.",
+    "map_title": "Interactieve kaart",
+    "map_desc": "Alle bestemmingen op één kaart met live winddata en filters.",
+    "season_title": "Beste reistijd",
+    "season_desc": "Optimale reismaanden voor elke bestemming.",
+    "level_title": "Niveaufilter",
+    "level_desc": "Beginner, Gemiddeld of Pro — passende spots direct.",
+    "windy_title": "Windy-integratie",
+    "windy_desc": "Directe link naar Windy.com met exacte coördinaten van elke spot."
+  },
+  "cta": {
+    "title": "Klaar?",
+    "sub": "Gratis registreren — geen abonnement, geen creditcard.",
+    "btn": "Nu starten"
+  },
+  "spot_detail": {
+    "back": "Spots",
+    "verified": "Geverifieerd",
+    "live_wind": "Live wind",
+    "live": "LIVE",
+    "gusts": "Windstoten",
+    "temp": "Temperatuur",
+    "forecast": "7-daagse verwachting",
+    "kite_options": "Kite-opties",
+    "best_months": "Beste reistijd",
+    "ratings": "Beoordelingen",
+    "about": "Over deze spot",
+    "accommodation": "Accommodatie zoeken",
+    "wind_unavailable": "Winddata momenteel niet beschikbaar.",
+    "not_found": "Bestemming niet gevonden.",
+    "wind_quality": "Windkwaliteit",
+    "reliability": "Betrouwbaarheid",
+    "crowd": "Drukte",
+    "beginner_friendly": "Beginnersvriendelijk",
+    "price": "Prijsniveau",
+    "overall": "Totaal",
+    "open_windy": "Openen op Windy.com"
+  },
+  "auth": {
+    "login_title": "Welkom terug.",
+    "login_sub": "Log in om je spots te bekijken.",
+    "register_title": "Account aanmaken.",
+    "register_sub": "Gratis — geen abonnement nodig.",
+    "email": "E-mail",
+    "password": "Wachtwoord",
+    "confirm_password": "Wachtwoord bevestigen",
+    "name": "Naam",
+    "forgot": "Wachtwoord vergeten?",
+    "signin": "Inloggen",
+    "register": "Registreren",
+    "no_account": "Nog geen account?",
+    "has_account": "Al geregistreerd?",
+    "guest": "Doorgaan als gast",
+    "google": "Doorgaan met Google",
+    "apple": "Doorgaan met Apple",
+    "or": "of",
+    "level_title": "Jouw niveau?",
+    "level_sub": "Zodat we de juiste spots laten zien.",
+    "next": "Volgende",
+    "back": "Terug",
+    "beginner": "Beginner",
+    "beginner_desc": "Ik ben nog aan het leren",
+    "intermediate": "Gemiddeld",
+    "intermediate_desc": "1–3 jaar ervaring",
+    "pro": "Pro",
+    "pro_desc": "Jaren ervaring"
+  },
+  "footer": {
+    "copy": "© 2025 Lockite"
+  }
+}
